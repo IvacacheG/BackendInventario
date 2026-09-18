@@ -15,16 +15,78 @@ const options = {
         description: 'Servidor Local',
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
     paths: {
+      '/api/auth/registro': {
+        post: {
+          summary: 'Registrar un nuevo usuario',
+          tags: ['Autenticación'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    nombre: { type: 'string', example: 'Juan Pérez' },
+                    email: { type: 'string', example: 'juan@email.com' },
+                    password: { type: 'string', example: '123456' },
+                    rol: { type: 'string', example: 'ADMIN' }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            201: { description: 'Usuario registrado con éxito' },
+            400: { description: 'El email ya existe o datos inválidos' }
+          }
+        }
+      },
+      '/api/auth/login': {
+        post: {
+          summary: 'Iniciar sesión para obtener Token JWT',
+          tags: ['Autenticación'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    email: { type: 'string', example: 'juan@email.com' },
+                    password: { type: 'string', example: '123456' }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            200: { description: 'Login exitoso y retorno de Token' },
+            401: { description: 'Credenciales inválidas' }
+          }
+        }
+      },
       '/api/productos': {
         get: {
           summary: 'Obtiene la lista de todos los productos',
+          tags: ['Productos'],
           responses: {
             200: { description: 'Lista de productos obtenida con éxito' }
           }
         },
         post: {
-          summary: 'Crea un nuevo producto',
+          summary: 'Crea un nuevo producto (Protegido)',
+          tags: ['Productos'],
+          security: [{ bearerAuth: [] }],
           requestBody: {
             required: true,
             content: {
@@ -44,13 +106,14 @@ const options = {
           },
           responses: {
             201: { description: 'Producto creado con éxito' },
-            400: { description: 'Datos incompletos' }
+            401: { description: 'No autorizado' }
           }
         }
       },
       '/api/productos/{id}': {
         get: {
           summary: 'Obtiene un producto por su ID',
+          tags: ['Productos'],
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
           ],
@@ -60,7 +123,9 @@ const options = {
           }
         },
         put: {
-          summary: 'Actualiza un producto por su ID',
+          summary: 'Actualiza un producto por su ID (Protegido)',
+          tags: ['Productos'],
+          security: [{ bearerAuth: [] }],
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
           ],
@@ -81,17 +146,19 @@ const options = {
           },
           responses: {
             200: { description: 'Producto actualizado con éxito' },
-            404: { description: 'Producto no encontrado' }
+            401: { description: 'No autorizado' }
           }
         },
         delete: {
-          summary: 'Elimina un producto por su ID',
+          summary: 'Elimina un producto por su ID (Protegido)',
+          tags: ['Productos'],
+          security: [{ bearerAuth: [] }],
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
           ],
           responses: {
             200: { description: 'Producto eliminado con éxito' },
-            404: { description: 'Producto no encontrado' }
+            401: { description: 'No autorizado' }
           }
         }
       }
