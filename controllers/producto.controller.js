@@ -3,81 +3,108 @@ const Producto = require('../models/producto.model');
 // Obtener todos los productos
 exports.obtenerProductos = async (req, res, next) => {
   try {
-    const productos = await Producto.find();
-    res.status(200).json({ ok: true, datos: productos });
+    const productos = await Producto.find().sort({ createdAt: -1 });
+    res.status(200).json({
+      ok: true,
+      datos: productos
+    });
   } catch (error) {
     next(error);
   }
 };
 
-// Obtener un producto por ID
+// Obtener un producto por su ID
 exports.obtenerProductoPorId = async (req, res, next) => {
   try {
-    const producto = await Producto.findById(req.params.id);
+    const { id } = req.params;
+    const producto = await Producto.findById(id);
+
     if (!producto) {
-      return res.status(404).json({ ok: false, mensaje: 'Producto no encontrado' });
-    }
-    res.status(200).json({ ok: true, datos: producto });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Crear un nuevo producto
-exports.crearProducto = async (req, res, next) => {
-  try {
-    const { nombre, precio, stock, codigoBarras, stockMinimo } = req.body;
-
-    if (!nombre || precio === undefined) {
-      return res.status(400).json({
+      return res.status(404).json({
         ok: false,
-        mensaje: 'Bad Request: Nombre y precio son obligatorios'
+        mensaje: 'Producto no encontrado'
       });
     }
 
-    const nuevoProducto = await Producto.create({
-      nombre,
-      precio,
-      stock,
-      codigoBarras,
-      stockMinimo
-    });
-
-    res.status(201).json({ 
-      ok: true, 
-      mensaje: 'Producto creado exitosamente en la base de datos', 
-      datos: nuevoProducto 
+    res.status(200).json({
+      ok: true,
+      datos: producto
     });
   } catch (error) {
     next(error);
   }
 };
 
-// Actualizar un producto por ID
+// Crear un nuevo producto (Captura error de código de barras duplicado)
+exports.crearProducto = async (req, res, next) => {
+  try {
+    const nuevoProducto = await Producto.create(req.body);
+    res.status(201).json({
+      ok: true,
+      mensaje: 'Producto creado exitosamente en la base de datos',
+      datos: nuevoProducto
+    });
+  } catch (error) {
+    // Manejo de error E11000: Clave duplicada en MongoDB
+    if (error.code === 11000) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El código de barras ya pertenece a otro producto'
+      });
+    }
+    next(error);
+  }
+};
+
+// Actualizar un producto existente
 exports.actualizarProducto = async (req, res, next) => {
   try {
-    const productoActualizado = await Producto.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const { id } = req.params;
+    const productoActualizado = await Producto.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true
+    });
+
     if (!productoActualizado) {
-      return res.status(404).json({ ok: false, mensaje: 'Producto no encontrado' });
+      return res.status(404).json({
+        ok: false,
+        mensaje: 'Producto no encontrado para actualizar'
+      });
     }
-    res.status(200).json({ ok: true, mensaje: 'Producto actualizado', datos: productoActualizado });
+
+    res.status(200).json({
+      ok: true,
+      mensaje: 'Producto actualizado con éxito',
+      datos: productoActualizado
+    });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El código de barras ingresado ya está en uso'
+      });
+    }
     next(error);
   }
 };
 
-// Eliminar un producto por ID
+// Eliminar un producto
 exports.eliminarProducto = async (req, res, next) => {
   try {
-    const productoEliminado = await Producto.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+    const productoEliminado = await Producto.findByIdAndDelete(id);
+
     if (!productoEliminado) {
-      return res.status(404).json({ ok: false, mensaje: 'Producto no encontrado' });
+      return res.status(404).json({
+        ok: false,
+        mensaje: 'Producto no encontrado para eliminar'
+      });
     }
-    res.status(200).json({ ok: true, mensaje: 'Producto eliminado correctamente' });
+
+    res.status(200).json({
+      ok: true,
+      mensaje: 'Producto eliminado con éxito'
+    });
   } catch (error) {
     next(error);
   }
