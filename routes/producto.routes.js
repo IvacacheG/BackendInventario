@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const productoController = require('../controllers/producto.controller');
+const { protegerRuta } = require('../middlewares/auth.middleware');
 
-// Rutas generales
+// Rutas públicas (cualquiera puede ver los productos)
 router.get('/', productoController.obtenerProductos);
-router.post('/', productoController.crearProducto);
-
-// Rutas por ID
 router.get('/:id', productoController.obtenerProductoPorId);
-router.put('/:id', productoController.actualizarProducto);
-router.delete('/:id', productoController.eliminarProducto);
+
+// Rutas protegidas (requieren Token JWT)
+router.post('/', protegerRuta, productoController.crearProducto);
+router.put('/:id', protegerRuta, productoController.actualizarProducto);
+router.delete('/:id', protegerRuta, productoController.eliminarProducto);
 
 module.exports = router;
