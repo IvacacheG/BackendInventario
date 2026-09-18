@@ -161,6 +161,43 @@ const options = {
             401: { description: 'No autorizado' }
           }
         }
+      },
+      '/api/movimientos': {
+        get: {
+          summary: 'Obtener historial de movimientos (Protegido)',
+          tags: ['Movimientos'],
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: { description: 'Historial de movimientos obtenido con éxito' },
+            401: { description: 'No autorizado' }
+          }
+        },
+        post: {
+          summary: 'Registrar un movimiento / venta (Protegido)',
+          tags: ['Movimientos'],
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    productoId: { type: 'string', example: '6aa...ID_DEL_PRODUCTO' },
+                    tipo: { type: 'string', example: 'SALIDA' },
+                    cantidad: { type: 'number', example: 2 },
+                    motivo: { type: 'string', example: 'Venta mostrador' }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            201: { description: 'Movimiento registrado y stock actualizado' },
+            400: { description: 'Stock insuficiente o datos inválidos' },
+            401: { description: 'No autorizado' }
+          }
+        }
       }
     }
   },

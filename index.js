@@ -4,6 +4,7 @@ const cors = require('cors');
 const conectarDB = require('./config/db');
 const productoRoutes = require('./routes/producto.routes');
 const authRoutes = require('./routes/auth.routes');
+const movimientoRoutes = require('./routes/movimiento.routes');
 const setupSwagger = require('./config/swagger');
 
 const app = express();
@@ -18,6 +19,7 @@ conectarDB();
 // Rutas API
 app.use('/api/productos', productoRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/movimientos', movimientoRoutes);
 
 // Documentación Swagger
 setupSwagger(app);
