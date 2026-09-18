@@ -1,42 +1,27 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
-
-// 1. Importamos la función de conexión a MongoDB
 const conectarDB = require('./config/db');
-
-const manejarErrores = require('./middlewares/error.middleware');
-const setupSwagger = require('./config/swagger');
 const productoRoutes = require('./routes/producto.routes');
+const authRoutes = require('./routes/auth.routes');
+const setupSwagger = require('./config/swagger');
 
 const app = express();
 
-// 2. Ejecutamos la conexión a la base de datos
-conectarDB();
-
-// Middlewares iniciales
+// Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Conexión a Base de Datos
+conectarDB();
+
+// Rutas API
+app.use('/api/productos', productoRoutes);
+app.use('/api/auth', authRoutes);
 
 // Documentación Swagger
 setupSwagger(app);
 
-// Rutas de la API
-app.use('/api/productos', productoRoutes);
-
-// Ruta Base de Verificación (Healthcheck)
-app.get('/api/health', (req, res) => {
-  res.json({
-    estado: 'OK',
-    mensaje: 'Servidor Backend de Desarrollo funcionando correctamente',
-    timestamp: new Date()
-  });
-});
-
-// Middleware Global de Errores (SIEMPRE al final)
-app.use(manejarErrores);
-
-// Configuración de Puerto y Encendido
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`[SERVER] Escuchando en http://localhost:${PORT}`);
