@@ -35,7 +35,7 @@ exports.obtenerProductoPorId = async (req, res, next) => {
   }
 };
 
-// Crear un nuevo producto (Captura error de código de barras duplicado)
+// Crear un nuevo producto (con captura de error por código de barras duplicado)
 exports.crearProducto = async (req, res, next) => {
   try {
     const nuevoProducto = await Producto.create(req.body);
@@ -104,6 +104,24 @@ exports.eliminarProducto = async (req, res, next) => {
     res.status(200).json({
       ok: true,
       mensaje: 'Producto eliminado con éxito'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Obtener productos con stock crítico (Alerta de reabastecimiento)
+exports.obtenerStockBajo = async (req, res, next) => {
+  try {
+    // Filtra los productos donde el stock sea menor o igual a stockMinimo
+    const productosBajos = await Producto.find({
+      $expr: { $lte: ['$stock', '$stockMinimo'] }
+    }).sort({ stock: 1 });
+
+    res.status(200).json({
+      ok: true,
+      total: productosBajos.length,
+      datos: productosBajos
     });
   } catch (error) {
     next(error);
