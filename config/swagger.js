@@ -1,5 +1,4 @@
 const swaggerJSDoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
 
 const options = {
   definition: {
@@ -7,13 +6,13 @@ const options = {
     info: {
       title: 'API REST - Sistema de Inventario',
       version: '1.0.0',
-      description: 'Documentación interactiva de la API para clientes Web y Móvil',
+      description: 'Documentación interactiva de la API para clientes Web y Móvil'
     },
     servers: [
       {
         url: 'http://localhost:3000',
-        description: 'Servidor Local',
-      },
+        description: 'Servidor Local'
+      }
     ],
     components: {
       securitySchemes: {
@@ -21,10 +20,12 @@ const options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-        },
-      },
+          description: 'Ingresa el Token JWT obtenido en el Login'
+        }
+      }
     },
     paths: {
+      // --- AUTENTICACIÓN ---
       '/api/auth/registro': {
         post: {
           summary: 'Registrar un nuevo usuario',
@@ -70,17 +71,19 @@ const options = {
             }
           },
           responses: {
-            200: { description: 'Login exitoso y retorno de Token' },
+            200: { description: 'Login exitoso y retorno de Token JWT' },
             401: { description: 'Credenciales inválidas' }
           }
         }
       },
+
+      // --- PRODUCTOS ---
       '/api/productos': {
         get: {
           summary: 'Obtiene la lista de todos los productos',
           tags: ['Productos'],
           responses: {
-            200: { description: 'Lista de productos obtenida con éxito' }
+            200: { description: 'Lista de productos obtenida correctamente' }
           }
         },
         post: {
@@ -94,10 +97,10 @@ const options = {
                 schema: {
                   type: 'object',
                   properties: {
-                    nombre: { type: 'string', example: 'Coca Cola 2L' },
-                    precio: { type: 'number', example: 4600 },
-                    stock: { type: 'number', example: 10 },
-                    codigoBarras: { type: 'string', example: '779123456789' },
+                    nombre: { type: 'string', example: 'Pepsi 2.25L' },
+                    precio: { type: 'number', example: 4200 },
+                    stock: { type: 'number', example: 15 },
+                    codigoBarras: { type: 'string', example: '779123456790' },
                     stockMinimo: { type: 'number', example: 5 }
                   }
                 }
@@ -105,7 +108,19 @@ const options = {
             }
           },
           responses: {
-            201: { description: 'Producto creado con éxito' },
+            201: { description: 'Producto creado exitosamente' },
+            400: { description: 'Código de barras duplicado o datos inválidos' },
+            401: { description: 'No autorizado' }
+          }
+        }
+      },
+      '/api/productos/stock-bajo': {
+        get: {
+          summary: 'Obtener productos con stock crítico (Protegido)',
+          tags: ['Productos'],
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: { description: 'Lista de productos con stock menor o igual al mínimo' },
             401: { description: 'No autorizado' }
           }
         }
@@ -115,7 +130,13 @@ const options = {
           summary: 'Obtiene un producto por su ID',
           tags: ['Productos'],
           parameters: [
-            { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+            {
+              in: 'path',
+              name: 'id',
+              required: true,
+              schema: { type: 'string' },
+              description: 'ID de MongoDB del producto'
+            }
           ],
           responses: {
             200: { description: 'Producto encontrado' },
@@ -127,7 +148,12 @@ const options = {
           tags: ['Productos'],
           security: [{ bearerAuth: [] }],
           parameters: [
-            { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+            {
+              in: 'path',
+              name: 'id',
+              required: true,
+              schema: { type: 'string' }
+            }
           ],
           requestBody: {
             required: true,
@@ -136,9 +162,8 @@ const options = {
                 schema: {
                   type: 'object',
                   properties: {
-                    nombre: { type: 'string', example: 'Coca Cola 2.25L' },
-                    precio: { type: 'number', example: 4800 },
-                    stock: { type: 'number', example: 15 }
+                    nombre: { type: 'string', example: 'Pepsi 2.25L Modificada' },
+                    precio: { type: 'number', example: 4500 }
                   }
                 }
               }
@@ -146,7 +171,7 @@ const options = {
           },
           responses: {
             200: { description: 'Producto actualizado con éxito' },
-            401: { description: 'No autorizado' }
+            404: { description: 'Producto no encontrado' }
           }
         },
         delete: {
@@ -154,14 +179,21 @@ const options = {
           tags: ['Productos'],
           security: [{ bearerAuth: [] }],
           parameters: [
-            { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+            {
+              in: 'path',
+              name: 'id',
+              required: true,
+              schema: { type: 'string' }
+            }
           ],
           responses: {
             200: { description: 'Producto eliminado con éxito' },
-            401: { description: 'No autorizado' }
+            404: { description: 'Producto no encontrado' }
           }
         }
       },
+
+      // --- MOVIMIENTOS ---
       '/api/movimientos': {
         get: {
           summary: 'Obtener historial de movimientos (Protegido)',
@@ -183,10 +215,10 @@ const options = {
                 schema: {
                   type: 'object',
                   properties: {
-                    productoId: { type: 'string', example: '6aa...ID_DEL_PRODUCTO' },
+                    producto: { type: 'string', example: '65f1234567890abc' },
                     tipo: { type: 'string', example: 'SALIDA' },
                     cantidad: { type: 'number', example: 2 },
-                    motivo: { type: 'string', example: 'Venta mostrador' }
+                    motivo: { type: 'string', example: 'Venta de mostrador' }
                   }
                 }
               }
@@ -194,20 +226,15 @@ const options = {
           },
           responses: {
             201: { description: 'Movimiento registrado y stock actualizado' },
-            400: { description: 'Stock insuficiente o datos inválidos' },
-            401: { description: 'No autorizado' }
+            400: { description: 'Stock insuficiente o datos inválidos' }
           }
         }
       }
     }
   },
-  apis: [],
+  apis: ['./routes/*.js']
 };
 
 const swaggerSpec = swaggerJSDoc(options);
 
-const setupSwagger = (app) => {
-  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-};
-
-module.exports = setupSwagger;
+module.exports = swaggerSpec;
