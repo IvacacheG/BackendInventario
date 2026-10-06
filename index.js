@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const conectarDB = require('./config/db');
@@ -12,6 +13,9 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Servir la interfaz web de pruebas del backend
+app.use(express.static(path.join(__dirname, 'public', 'public')));
 
 // Conexión a Base de Datos
 conectarDB();

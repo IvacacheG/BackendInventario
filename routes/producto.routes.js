@@ -3,7 +3,8 @@ const router = express.Router();
 const productoController = require('../controllers/producto.controller');
 const { protegerRuta } = require('../middlewares/auth.middleware');
 
-// Rutas públicas (cualquiera puede ver los productos)
+// Rutas públicas
+router.get('/stock-bajo', productoController.obtenerStockBajo);
 router.get('/', productoController.obtenerProductos);
 router.get('/:id', productoController.obtenerProductoPorId);
 
