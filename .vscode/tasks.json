@@ -1,0 +1,137 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run backend server",
+			"type": "shell",
+			"command": "node index.js",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check diff",
+			"type": "shell",
+			"command": "git status --short && git diff -- index.js routes/producto.routes.js",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check git diff exact files",
+			"type": "shell",
+			"command": "cmd /c \"git --no-pager status --short && echo. && git --no-pager diff -- index.js routes/producto.routes.js\"",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "gitstatus2",
+			"type": "shell",
+			"command": "git --no-pager status --short; echo .; git --no-pager diff -- index.js routes/producto.routes.js",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Commit tracked fixes",
+			"type": "shell",
+			"command": "git add index.js routes/producto.routes.js; git commit -m \"Fix static UI serving and stock-low route\" -m \"Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>\"",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "commit2",
+			"type": "shell",
+			"command": "git add index.js routes/producto.routes.js; git commit -m \"Fix static UI serving and stock-low route\" -m 'Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>'",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Verify repository",
+			"type": "shell",
+			"command": "git remote -v; git rev-parse --show-toplevel; git status --short; git branch --show-current",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check repository branch",
+			"type": "shell",
+			"command": "git status -sb; git --no-pager log -1 --format=\"%h %s\"; git config --get-regexp \"^remote\\..*\\.(url|fetch)$\"",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect git staging",
+			"type": "shell",
+			"command": "git status --short; git --no-pager diff --cached --name-only; git remote -v",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Create project README",
+			"type": "shell",
+			"command": "echo \"# BackendInventario\" >> README.md",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Write README heading",
+			"type": "shell",
+			"command": "Add-Content -Path README.md -Value '# BackendInventario'",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Initialize git repository",
+			"type": "shell",
+			"command": "git init",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Stage README",
+			"type": "shell",
+			"command": "git add README.md; git status --short",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Create initial commit",
+			"type": "shell",
+			"command": "git commit -m 'first commit' -m 'Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>'",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Rename branch main",
+			"type": "shell",
+			"command": "git branch -M main; git branch --show-current",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Add GitHub origin",
+			"type": "shell",
+			"command": "git remote add origin https://github.com/IvacacheG/BackendInventario.git; git remote -v",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Push main to GitHub",
+			"type": "shell",
+			"command": "git push -u origin main",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Verify pushed repository",
+			"type": "shell",
+			"command": "git status --short; git --no-pager log -1 --oneline; git branch -vv",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}
