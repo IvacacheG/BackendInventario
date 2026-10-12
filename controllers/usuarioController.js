@@ -1,4 +1,4 @@
-const Usuario = require('../models/Usuario');
+const Usuario = require('../models/usuario.model');
 const bcrypt = require('bcryptjs');
 
 // 1. Listar todos los usuarios del sistema (Solo Admin)
