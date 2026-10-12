@@ -1,16 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const productoController = require('../controllers/producto.controller');
-const { protegerRuta } = require('../middlewares/auth.middleware');
+const { verificarToken, verificarPermiso } = require('../middlewares/auth');
 
-// Rutas públicas
+// Rutas públicas (cualquiera puede ver el catálogo y el stock bajo)
 router.get('/stock-bajo', productoController.obtenerStockBajo);
 router.get('/', productoController.obtenerProductos);
 router.get('/:id', productoController.obtenerProductoPorId);
 
-// Rutas protegidas (requieren Token JWT)
-router.post('/', protegerRuta, productoController.crearProducto);
-router.put('/:id', protegerRuta, productoController.actualizarProducto);
-router.delete('/:id', protegerRuta, productoController.eliminarProducto);
+// Rutas protegidas con permisos granulares (profesor requirements)
+// 1. Crear producto: Requiere token y permiso 'crearProductos'
+router.post('/', [verificarToken, verificarPermiso('crearProductos')], productoController.crearProducto);
+
+// 2. Actualizar producto/stock: Requiere token y permiso 'modificarStock'
+router.put('/:id', [verificarToken, verificarPermiso('modificarStock')], productoController.actualizarProducto);
+
+// 3. Eliminar producto: Requiere token y permiso de creación/admin
+router.delete('/:id', [verificarToken, verificarPermiso('crearProductos')], productoController.eliminarProducto);
 
 module.exports = router;
