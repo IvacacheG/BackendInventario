@@ -6,6 +6,7 @@ const conectarDB = require('./config/db');
 const productoRoutes = require('./routes/producto.routes');
 const authRoutes = require('./routes/auth.routes');
 const movimientoRoutes = require('./routes/movimiento.routes');
+const usuarioRoutes = require('./routes/usuarioRoutes'); // <--- NUEVO: Importar rutas de usuarios
 const setupSwagger = require('./config/swagger');
 
 const app = express();
@@ -24,6 +25,7 @@ conectarDB();
 app.use('/api/productos', productoRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/movimientos', movimientoRoutes);
+app.use('/api/usuarios', usuarioRoutes); // <--- NUEVO: Registrar endpoint de usuarios
 
 // Documentación Swagger
 setupSwagger(app);

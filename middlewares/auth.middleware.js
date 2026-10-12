@@ -1,29 +1,61 @@
 const jwt = require('jsonwebtoken');
-const Usuario = require('../models/usuario.model');
 
-const protegerRuta = async (req, res, next) => {
-  let token;
-
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      // Obtener el token del encabezado 'Bearer TOKEN'
-      token = req.headers.authorization.split(' ')[1];
-
-      // Verificar la validez del token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Adjuntar la información del usuario a la petición (excluyendo la contraseña)
-      req.usuario = await Usuario.findById(decoded.id).select('-password');
-
-      next();
-    } catch (error) {
-      return res.status(401).json({ ok: false, mensaje: 'No autorizado, token inválido' });
-    }
-  }
+// 1. Verificar si el usuario está autenticado mediante el token JWT
+const verificarToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Formato esperado: "Bearer TOKEN"
 
   if (!token) {
-    return res.status(401).json({ ok: false, mensaje: 'No autorizado, no se proporcionó un token' });
+    return res.status(401).json({ 
+      mensaje: 'Acceso denegado: No se proporcionó un token de autenticación' 
+    });
+  }
+
+  try {
+    const secret = process.env.JWT_SECRET || 'clave_secreta_temporal';
+    const decoded = jwt.verify(token, secret);
+    req.usuario = decoded; // Inyecta los datos del usuario decodificados en la petición
+    next();
+  } catch (error) {
+    return res.status(403).json({ 
+      mensaje: 'Token inválido o expirado' 
+    });
   }
 };
 
-module.exports = { protegerRuta };
+// 2. Verificar si el usuario posee un rol específico permitido
+const verificarRol = (...rolesPermitidos) => {
+  return (req, res, next) => {
+    if (!req.usuario || !rolesPermitidos.includes(req.usuario.rol)) {
+      return res.status(403).json({ 
+        mensaje: 'Acceso denegado: No tienes el rol necesario para realizar esta acción' 
+      });
+    }
+    next();
+  };
+};
+
+// 3. Verificar si el usuario posee un permiso granular específico
+const verificarPermiso = (permisoRequerido) => {
+  return (req, res, next) => {
+    // Si el usuario es ADMIN supremo, tiene acceso total automático
+    if (req.usuario && req.usuario.rol === 'ADMIN') {
+      return next();
+    }
+
+    // Validar si el usuario tiene activado el permiso puntual en su objeto permisos
+    if (req.usuario && req.usuario.permisos && req.usuario.permisos[permisoRequerido]) {
+      return next();
+    }
+
+    return res.status(403).json({ 
+      mensaje: `Acceso denegado: No cuentas con el permiso granular '${permisoRequerido}'` 
+    });
+  };
+};
+
+module.exports = {
+  verificarToken,
+  verificarRol,
+  verificarPermiso
+};
