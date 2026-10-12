@@ -5,7 +5,7 @@ const {
   crearUsuarioAdmin, 
   actualizarPermisos 
 } = require('../controllers/usuarioController');
-const { verificarToken, verificarRol } = require('../middlewares/auth');
+const { verificarToken, verificarRol } = require('../middlewares/auth.middleware'); // <--- RUTA CORREGIDA
 
 // Todas estas rutas están protegidas y exigen que quien las invoque sea rol 'ADMIN'
 router.get('/', [verificarToken, verificarRol('ADMIN')], obtenerUsuarios);
