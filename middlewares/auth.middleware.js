@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-// 1. Verificar si el usuario está autenticado mediante el token JWT
+// 1. Verificar si el usuario está autenticado mediante el token JWT (Alias: protegerRuta)
 const verificarToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Formato esperado: "Bearer TOKEN"
@@ -14,7 +14,7 @@ const verificarToken = (req, res, next) => {
   try {
     const secret = process.env.JWT_SECRET || 'clave_secreta_temporal';
     const decoded = jwt.verify(token, secret);
-    req.usuario = decoded; // Inyecta los datos del usuario decodificados en la petición
+    req.usuario = decoded; // Inyecta los datos del usuario decodificados
     next();
   } catch (error) {
     return res.status(403).json({ 
@@ -22,6 +22,9 @@ const verificarToken = (req, res, next) => {
     });
   }
 };
+
+// Exportamos también como protegerRuta para que no rompa otras rutas existentes
+const protegerRuta = verificarToken;
 
 // 2. Verificar si el usuario posee un rol específico permitido
 const verificarRol = (...rolesPermitidos) => {
@@ -56,6 +59,7 @@ const verificarPermiso = (permisoRequerido) => {
 
 module.exports = {
   verificarToken,
+  protegerRuta,
   verificarRol,
   verificarPermiso
 };
